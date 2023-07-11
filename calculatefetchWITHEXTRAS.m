@@ -1,4 +1,4 @@
-function F=calculatefetchWITHEXTRAS(A,ndir,dx,angle,extrafetch,Lbasin,h)
+function F=calculatefetchWITHEXTRAS(A,ndir,dx,angle,extrafetch,Lbasin,MASK)
 %angle=315-180-0.
 angleo=angle;
 %angle=mod(angle-180,360);
@@ -33,6 +33,8 @@ if angleo<0 | angleo>360;A='error' ;end
 % F(IND)=cumsumreset(A(IND))/m*dx;
 % end
 
+
+ddd=1000/dx;
 padding=Lbasin*2;%must be larger than fetchlim!!!
 if (angleo<45 | angleo>315)
 F(IND)=cumsumresetEXTRA(A(IND),extrafetch/dx)/m*dx;
@@ -40,8 +42,8 @@ F(IND)=cumsumresetEXTRA(A(IND),extrafetch/dx)/m*dx;
         %ll=length(F(2:end-1-floor(N*0.5),end));    
         %F(2+floor(N*0.5):end-1,end-padding:end)=2*extrafetch*[1:ll]'/ll*ones(padding+1,1)';
         %F(end,end-padding:end)=extrafetch; 
-        a=find(h(:,end)<0);if a>0;Lside=a(end)-1;else;Lside=1;end
-        F(Lside:end,end-100:end)=max(extrafetch,F(Lside:end,end-100:end)); %TOGLI PER EVITRARE IL FETCH ALTO NELLE MUDFLAT SEAWARD
+        a=find(MASK(:,end)==0);if a>0;Lside=a(end)-1;else;Lside=1;end
+        F(Lside:end,end-ddd:end)=max(extrafetch,F(Lside:end,end-ddd:end)); %TOGLI PER EVITRARE IL FETCH ALTO NELLE MUDFLAT SEAWARD
         %F(Lside:end,end-10:end)=max(extrafetch,F(Lside:end,end-10:end)); 
         %F(:,end)=extrafetch; 
         else
@@ -49,14 +51,14 @@ F(IND)=cumsumresetEXTRA(A(IND),extrafetch/dx)/m*dx;
         %F(2+floor(N*0.5):end-1,1:1+padding)=2*extrafetch*[1:ll]'/ll*ones(padding+1,1)';
         %F(1,end-padding:end)=extrafetch; 
         %F(1,:)=extrafetch; 
-        a=find(h(:,1)<0);if a>0;Lside=a(end)-1;else;Lside=1;end
-        F(Lside:end,1:101)=max(extrafetch,F(Lside:end,1:101)); %TOGLI PER EVITRARE IL FETCH ALTO NELLE MUDFLAT SEAWARD
+        a=find(MASK(:,1)==0);if a>0;Lside=a(end)-1;else;Lside=1;end
+        F(Lside:end,1:ddd+1)=max(extrafetch,F(Lside:end,1:ddd+1)); %TOGLI PER EVITRARE IL FETCH ALTO NELLE MUDFLAT SEAWARD
         %F(Lside:end,1:11)=max(extrafetch,F(Lside:end,1:11)); 
         end
     
      
 elseif (angleo>=45 & angleo<90)%134)
-a=find(h(:,end)<0);if a>0;Lside=N-a(end)-1;else;Lside=N-1;end
+a=find(MASK(:,end)==0);if a>0;Lside=N-a(end)-1;else;Lside=N-1;end
 F(IND)=cumsumresetEXTRAlateral1(A(IND),extrafetch/dx,Lside)/m*dx;
 %(IND)=cumsumreset(A(IND))/m*dx;
 %a=find(MASK(
@@ -65,7 +67,7 @@ F(IND)=cumsumresetEXTRAlateral1(A(IND),extrafetch/dx,Lside)/m*dx;
        %F(2+N/2:end-1,end-padding:end)=extrafetch*[1:ll]'/ll*ones(padding+1,1)';   
        
 elseif (angleo>275 & angleo<=315)
-a=find(h(:,1)<0);if a>0;Lside=N-a(end)-1;else;Lside=N-1;end
+a=find(MASK(:,1)==0);if a>0;Lside=N-a(end)-1;else;Lside=N-1;end
 F(IND)=cumsumresetEXTRAlateral1(A(IND),extrafetch/dx,Lside)/m*dx;
 %F(IND)=cumsumreset(A(IND))/m*dx;
     F(end-Lside:end,:)=extrafetch;      %offshore boudnary  

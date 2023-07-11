@@ -1,8 +1,9 @@
-function [deltaY2,pondloss]=isolatedponddeepening(z,S,ponddeeprate,dt,pondloss);
+function [deltaY2,pondloss]=isolatedponddeepening(z,S,ponddeeprate,dt,pondloss,dBlo);
 
 zoriginal=z;
 
-p=find(S==1);%find the existing ponds
+%p=find(S==1);%find the existing ponds
+p=find(S==1 & z>dBlo);%find the existing ponds
 
 for i=1:length(p)
   dz=ponddeeprate*dt/365;

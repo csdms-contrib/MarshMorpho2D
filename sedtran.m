@@ -1,5 +1,6 @@
-function [EmD,SSM,FLX]=sedtran(numeric,d,A,DoMUD,DiffS,h,ho,E,WS,dx,dt,rbulk,co,Ux,Uy,FLX,fTide,Ttide,URx,URy,UresX,UresY,periodic,computeriver,computetide,residualcurrents,kro,MUD,coMUD,Qsmouthi);
+function [EmD,SSM,FLX]=sedtran(numeric,d,A,SPCLcell,DoMUD,DiffS,h,ho,E,WS,dx,dt,rbulk,co,Ux,Uy,FLX,fTide,Ttide,URx,URy,UresX,UresY,periodic,computeriver,computetide,residualcurrents,kro,MUD,coMUD,Qsmouthi);
 
+rivermouthfront=SPCLcell.rivermouthfront;
 
 QmouthRiver=FLX(1);
 QseaTide=FLX(2);
@@ -10,6 +11,7 @@ QmouthTide=FLX(4);
 %A(A==22)=2;
 
 A(ho<=0)=0; %ATTENTION: eliminate the cells in which the water depth is too small. They cannot evolve at all!!!! They will not erode nor accrete!!!!!!!!!!!!!!!!!!!!!!
+A(rivermouthfront)=1;%the cells in front of the river mouth: let them erode if needed
 
 %h=max(0.1,h);
 
@@ -28,9 +30,30 @@ if MUD==1;
 a=find(A==10);rhs(G(a))=coMUD.*h(a).*fTide(a);
 end
 
+%Dturb=0.1*24*3600;  %QUESTO PER ORA COME REFERENZA, POI METTI ALTRO!!!
+%Dturb=5.9*0.01*h*24*3600;+Dturb
+%Dxx=(Dwave*24*3600.*fTide+DiffS*Ttide/2.*(abs(Ux.*Ux))*(24*3600).^2)/(dx^2).*h;%.*h;%.*(ho>kro);%.*(hgross>0.01);%% the h is not the coefficient for diffusion, is the h in the mass balance eq.
+%Dyy=(Dwave*24*3600.*fTide+DiffS*Ttide/2.*(abs(Uy.*Uy))*(24*3600).^2)/(dx^2).*h;%.*h;%.*(ho>kro);%.*(hgross>0.01);
+%Dxx=(Dwave*24*3600+DiffS*Ttide/2.*(abs(Ux.*Ux))*(24*3600).^2)/(dx^2).*h;%.*h;%.*(ho>kro);%.*(hgross>0.01);%% the h is not the coefficient for diffusion, is the h in the mass balance eq.
+%Dyy=(Dwave*24*3600+DiffS*Ttide/2.*(abs(Uy.*Uy))*(24*3600).^2)/(dx^2).*h;%.*h;%.*(ho>kro);%.*(hgross>0.01);
 
+% Dxx=(Dwave*h*24*3600 +DiffS*Ttide/2.*(abs(Ux.*Ux))*(24*3600).^2)/(dx^2).*h;%.*h;%.*(ho>kro);%.*(hgross>0.01);%% the h is not the coefficient for diffusion, is the h in the mass balance eq.
+% Dyy=(Dwave*h*24*3600 +DiffS*Ttide/2.*(abs(Uy.*Uy))*(24*3600).^2)/(dx^2).*h;%.*h;%.*(ho>kro);%.*(hgross>0.01);
+%diffwave*24*3600 +
 Dxx=(DoMUD*24*3600 +DiffS*Ttide/2.*(abs(Ux.*Ux))*(24*3600).^2)/(dx^2).*h;%.*h;%.*(ho>kro);%.*(hgross>0.01);%% the h is not the coefficient for diffusion, is the h in the mass balance eq.
 Dyy=(DoMUD*24*3600 +DiffS*Ttide/2.*(abs(Uy.*Uy))*(24*3600).^2)/(dx^2).*h;%.*h;%.*(ho>kro);%.*(hgross>0.01);
+%Dxx=(Dwave*10*24*3600*fTide +DiffS*Ttide/2.*(abs(Ux.*Ux))*(24*3600).^2)/(dx^2).*h;%.*h;%.*(ho>kro);%.*(hgross>0.01);%% the h is not the coefficient for diffusion, is the h in the mass balance eq.
+%Dyy=(Dwave*10*24*3600*fTide +DiffS*Ttide/2.*(abs(Uy.*Uy))*(24*3600).^2)/(dx^2).*h;%.*h;%.*(ho>kro);%.*(hgross>0.01);
+
+%Dxx=(Dwave*24*3600+DiffS*Ttide/2.*(abs(Ux.*Ux*0.1))*(24*3600).^2)/(dx^2).*h;%.*h.^2;%.*h;%.*(ho>kro);%.*(hgross>0.01);%% the h is not the coefficient for diffusion, is the h in the mass balance eq.
+%Dyy=(Dwave*24*3600+DiffS*Ttide/2.*(abs(Uy.*Uy*0.1))*(24*3600).^2)/(dx^2).*h;%.*h.^2;%.*h;%.*(ho>kro);%.*(hgross>0.01);
+
+%Dxx=(Dwave*24*3600+DiffS*Ttide/2.*(abs(Ux.^4*8/2))*(24*3600).^2)/(dx^2).*h;%.*h.^2;%.*h;%.*(ho>kro);%.*(hgross>0.01);%% the h is not the coefficient for diffusion, is the h in the mass balance eq.
+%Dyy=(Dwave*24*3600+DiffS*Ttide/2.*(abs(Uy.^4*8/2))*(24*3600).^2)/(dx^2).*h;%.*h.^2;%.*h;%.*(ho>kro);%.*(hgross>0.01);
+
+Dxx(A==10)=0;Dyy(A==10)=0; %no tidal flux at the river mouth
+Dxx(rivermouthfront)=0;Dyy(rivermouthfront)=0; %no tidal flux at the river mouth
+%the factor 24*3600 is used to convert the Ux and Uy from m/s to m/day
 
 [row col]=ind2sub(size(A),p);
 for k = [N -1 1 -N]  %go over the 4 directions for the gradients
@@ -156,6 +179,9 @@ end
 
 %Tide
 Q=Q+sum(DD.*(SSM(p(a))./h(p(a))./fTide(p(a))-SSM(q(a))./h(q(a))./fTide(q(a)))); %exit from that cell
+%River
+if (k==N | k==-N);QR=QR+sum((SSM(p(a)).*URy(p(a))))*sign(k);end
+if (k==1 | k==-1);QR=QR+sum((SSM(p(a)).*URx(p(a))))*sign(k);end
 end
 
 QseaTide=QseaTide+dx*dt*Q/rbulk; %(note the the divided dx is for the gradient, not for the cell width!)
@@ -197,6 +223,7 @@ QmouthRiver=QmouthRiver+dt*3600*24*QR/rbulk;
 %SUM OF THE RIVER INPUT (IMPOSED FROM THE OUTISE USING Qsmouthi, which is cl
 QmouthRiver=FLX(1)+Qsmouthi*dt*24*3600/rbulk;
 FLX=[QmouthRiver;QseaTide;QseaRiver;QmouthTide];
+
 
 
 

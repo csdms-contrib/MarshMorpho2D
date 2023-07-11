@@ -1,4 +1,4 @@
-function [deltaY2,Pedge,Y2OX,EdgeERY2]=EdgeerosionXXX(P,z,aw,maxedgeheight,fox,dt,dx,MASK,A,Y2OX);
+function [deltaY1,deltaY2,deltaY3,Pedge,Y2OX,EdgeERY1,EdgeERY2,EdgeERY3]=EdgeerosionXXX(P,z,aw,maxedgeheight,fox,dt,dx,MASK,A,fracY1,fracY2,fracY3,Y2OX);
 
 
 
@@ -23,8 +23,13 @@ a=find(r<aw*Pedge(edg)*dt/dx);
 %these cells will erode (the "high" cells)
 edger=edg(a);
 
+deltaY1=MASK*0;
 deltaY2=MASK*0;
+deltaY3=MASK*0;
+
+EdgeERY1=MASK*0;
 EdgeERY2=MASK*0;
+EdgeERY3=MASK*0;
 
 
 
@@ -51,15 +56,31 @@ for i=1:length(edger)
             %dz=2;%maxedgeheight;
                         
             %this is how much the bed is lowered, includes everything!!!
-            deltaY2(edger(i))=deltaY2(edger(i))+dz;
+            deltaY1(edger(i))=deltaY1(edger(i))+dz.*fracY1(edger(i));
+            deltaY2(edger(i))=deltaY2(edger(i))+dz.*fracY2(edger(i));
+            deltaY3(edger(i))=deltaY3(edger(i))+dz.*fracY3(edger(i));
 
             %This goes into resuspension. %This is what is conserved!!!
-            EdgeERY2(edger(i))=EdgeERY2(edger(i))+dz.*(1-fox);
-                                   
+            EdgeERY1(edger(i))=EdgeERY1(edger(i))+dz.*fracY1(edger(i));%you cannot oxydize the sand!!!
+            EdgeERY2(edger(i))=EdgeERY2(edger(i))+dz.*fracY2(edger(i))*(1-fox);
+            EdgeERY3(edger(i))=0;%EdgeERY3(edger(i))+dz.*fracY3(edger(i))*0;%(1-fox);the plant material is always oxidized
+                        
+            
             %Keep track of how much you oxydeized!!!!
-            Y2OX=Y2OX+dz.*fox;
+            Y2OX=Y2OX+dz.*fracY2(edger(i))*fox;
     
-
+%             %redistirbution of the eroded sediment
+%             totcell=1+length(a);
+%     
+%             deltaY1(edger(i))=deltaY1(edger(i))-dz/totcell.*fracY1(edger(i));
+%             deltaY1(p(a))=deltaY1(p(a))-dz/totcell.*fracY1(edger(i));
+%     
+%             Y2OX=Y2OX+fox*dz.*fracY2(edger(i));
+%             deltaY2(edger(i))=deltaY2(edger(i))-dz/totcell.*fracY2(edger(i))*(1-fox);
+%             deltaY2(p(a))=deltaY2(p(a))-dz/totcell.*fracY2(edger(i))*(1-fox);
+%             
+%             deltaY3(edger(i))=deltaY3(edger(i))-dz/totcell.*fracY3(edger(i))*(1-fox);
+%             deltaY3(p(a))=deltaY3(p(a))-dz/totcell.*fracY3(edger(i))*(1-fox);
     end
    
 end

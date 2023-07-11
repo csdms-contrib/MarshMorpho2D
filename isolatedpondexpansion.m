@@ -1,4 +1,4 @@
-function [S,deltaY2,pondlost]=isolatedpondexpansion(z,S,A,N,M,dx,dt,zpondcr,maxdpond,aPEXP,pondlost);
+function [S,deltaY2,pondlost]=isolatedpondexpansion(z,S,A,N,M,dx,dt,zpondcr,maxdpond,aPEXP,pondlost,Active);
 
 zoriginal=z;
 
@@ -15,7 +15,8 @@ if k==-1;a=find(row-1>0);end;
 if k==1;a=find(row+1<=N);end;
 
 q=p+k;%the translated cell
-er=a(A(q(a))==1 & S(q(a))==0); %find the neightr cell that is a non-pond cell
+%er=a(A(q(a))==1 & S(q(a))==0 ); %find the neightr cell that is a non-pond cell,  %orignal AWR
+er=a(A(q(a))==1 & S(q(a))==0  & Active(q(a))==1); %find the neightr cell that is a non-pond cell, and is active
 
 
 %rng('shuffle');

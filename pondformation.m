@@ -1,4 +1,4 @@
-function [deltaY2,pondlost]=pondformation(A,dx,dt,Epondform,z,zpondcr,maxdpond,zsill,pondlost);
+function [deltaY2,pondlost]=pondformation(A,dx,dt,Epondform,z,zpondcr,maxdpond,zsill,pondlost,Active);
 
 zoriginal=z;
 
@@ -8,7 +8,8 @@ dz=max(z(p)-zpondcr,0);%base level of the pond
 dz=min(maxdpond,dz);%maximum scour depth
 
 %a=find(dz>0);%only create new ponds when the scour can be made!
-a=find(dz>0 & z(p)<zsill);%only create new ponds when the scour can be made!
+%a=find(dz>0 & z(p)<zsill);%only create new ponds when the scour can be made! %orignal AWR
+a=find(dz>0 & Active(p)==1);%only create new ponds when the scour can be made!
 
 r=rand(length(a),1);
 

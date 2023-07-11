@@ -3,17 +3,17 @@ function [Um,TP,HS,F,kwave,PW]=SeaWaves(h,angle,hwSea_lim,range,wind,MASK,ndir,d
 %angle=0;
 Um=0*h;TP=0*h;HS=0*h;
 
-extrafetch=5000;%[m}
+extrafetch=1000;%[m}
 Lbasin=1000/dx;
 Fetchlim=max(50,dx*2);%dx*2;%600;%dx*2*10;
 dlo=hwSea_lim; %minimum water depth to calculate wave. below this you don't calculate it
 
 
 
+MASK(:,1)=0;MASK(:,end)=0;
+
 
 extra=1;%if (angle<90 | angle>270);extra=1;else;extra=1;end
-
-
 
 
 %The standard way
@@ -33,7 +33,7 @@ end
 %For the idealize basin
 %extrafetch=10000;%[m}
 if extra==1;
-F=calculatefetchWITHEXTRAS(MASK,ndir,dx,angle,extrafetch,Lbasin,h-0.1-range/4);
+F=calculatefetchWITHEXTRAS(MASK,ndir,dx,angle,extrafetch,Lbasin,MASK);
 end
 % F1=calculatefetchWITHEXTRAS(MASK,ndir,dx,angle,extrafetch);
 % F2=calculatefetchWITHEXTRAS(MASK,ndir,dx,mod(angle+90,360),extrafetch);
@@ -59,13 +59,13 @@ Fo=F;
 F(Fo<=Fetchlim)=0;
 
 %usa questo per isolared la mudflat
-%%%%%%%%%%%%%%%%%%%%%%%%%%%
-if extra==1;
-MASK(end-Lbasin:end,:)=1;
-F(end-Lbasin:end,:)=extrafetch;
-Fo(end-Lbasin:end,:)=extrafetch;
-end
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%
+% if extra==1;
+% MASK(end-Lbasin:end,:)=1;
+% F(end-Lbasin:end,:)=extrafetch;
+% Fo(end-Lbasin:end,:)=extrafetch;
+% end
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %diffuse the fetch field    

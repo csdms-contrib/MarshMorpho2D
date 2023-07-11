@@ -1,4 +1,4 @@
-function [S,AC,DIF]=findisolatedponds(Z,A,N,M,dx,Zntw,Zsill,distdr,minponddepth);
+function [S,AC,DIF]=findisolatedponds(Z,A,N,M,dx,Zntw,Zsill,distdr,minponddepth,Active);
 
 % %Find everything that is isolated at least by the ponddepth threhsold
 % Zold=Z;
@@ -29,7 +29,7 @@ Zold=Z;
         Z(A==0)=10;
       
       Z=max(Zntw,Z);
-      Z=min(Zsill,Z);%flooding sill height.  This is not very importnat. It is just needed for the upland.. becuase we set Znnte = Trnage/2...
+      %Z=min(Zsill,Z);%flooding sill height.  This is not very importnat. It is just needed for the upland.. becuase we set Znnte = Trnage/2...
       ZZ=Z;ZZ(isnan(ZZ))=0;
       
       
@@ -46,10 +46,12 @@ ZZ=min(ZZ,min([ZZ(:,1)*0 ZZ(:,1:end-1)],min([ZZ(1,:)*0; ZZ(1:end-1,:)],min([ZZ(:
       ZZ=imfill(ZZ,4); %THIS DOES ALL THE HEAVY LIFTING!!!       ZZ=imfill(ZZ); %THIS DOES ALL THE HEAVY LIFTING!!!
       DIF = ZZ-Z;%the depth of pond filling.   oNLY USED TO DEFINE WHAT IS AN impounded area!!!
       DIF(DIF>0.001)=ZZ(DIF>0.001)-Zold(DIF>0.001);     %tHIS IS THE ACTUAL water depth in the pond
-      S=DIF>minponddepth;%what constitutes a pond
+      %S=DIF>minponddepth;%what constitutes a pond %orignal AWR
+      S=(DIF>minponddepth & Active==1);%what constitutes a pond
       
 
-AC=(Zold<Zntw & DIF<=minponddepth);%%IF<10^-8
+%AC=(Zold<Zntw & DIF<=minponddepth);%%IF<10^-8 %orignal AWR
+AC=(Zold<Zntw & DIF<=minponddepth & Active==1);%%IF<10^-8
 
 %lateral never a pond. CODE: KREMLIN
 %S(:,1)=0;S(:,end)=0;
